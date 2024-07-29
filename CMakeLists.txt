@@ -13,19 +13,30 @@ set(CMAKE_SHARED_LINKER_FLAGS_DEBUGEDITOR "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}")
 
 set(ADDITIONAL_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Tools/CMake")
 
-include(${ADDITIONAL_INCLUDE_PATH}/FetchContent.cmake)
-include(${ADDITIONAL_INCLUDE_PATH}/Imgui.cmake)
-
-set(SDL_LIBRARIES ${SDL_LIBRARIES} SDL2main SDL2 SDL2_image SDL2_ttf)
-
 set(SRC_DIR "${CMAKE_SOURCE_DIR}/Source")
 file(GLOB_RECURSE src "${SRC_DIR}/*.h" "${SRC_DIR}/*.cpp")
 
 add_executable(${PROJECT_NAME} ${src})
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:DebugEditor>:EDITOR=1>)
 
-target_link_libraries("${PROJECT_NAME}" PRIVATE ${SDL_LIBRARIES} nlohmann_json::nlohmann_json)
-target_link_libraries("${PROJECT_NAME}" PRIVATE debug imgui_lib)
+if(UNIX)
+    message(FATAL_ERROR "UNIX not implemented!")
+else()
+    set(DEPS_PATH "${CMAKE_SOURCE_DIR}/Deps")
+    set(DEPS_LIBS_PATH "${DEPS_PATH}/bin/Release")
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/Tools/CMake/GroupSourcesByFolder.cmake)
+    include_directories("${DEPS_PATH}/bin/_deps/sdl2-src/include")
+    set(SDL2_LIBRARIES "${DEPS_LIBS_PATH}/SDL2.lib;${DEPS_LIBS_PATH}/SDL2main.lib")
+
+    set(imgui_lib "${DEPS_LIBS_PATH}/imgui_lib.lib")
+    set(imgui_includes "${DEPS_PATH}/bin/_deps/imgui-src")
+    
+    target_include_directories(${PROJECT_NAME} PRIVATE
+    $<$<OR:$<CONFIG:Debug>,$<CONFIG:DebugEditor>>:${imgui_includes}>
+    )
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:DebugEditor>>:${imgui_lib}>)
+endif()
+
+include(${ADDITIONAL_INCLUDE_PATH}/Functions.cmake)
 GroupSourcesByFolder(${PROJECT_NAME})

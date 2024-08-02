@@ -18,4 +18,4 @@ subprocess.check_call(["cmake",
     f"-DCMAKE_CONFIGURATION_TYPES={CONFIGURATIONS}", "-S", ".", "-B", "./bin"])
 
 if args.open:
-    subprocess.Popen(["start", "bin/2DGameEngine.sln"], shell=True)
+    subprocess.Popen(["start", "bin/2DGameEngineDemo.sln"], shell=True)

@@ -1,19 +1,18 @@
 cmake_minimum_required(VERSION 3.28)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(ADDITIONAL_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/Tools/CMake")
-
 set(ENGINE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 file(GLOB_RECURSE engine_src "${ENGINE_SRC_DIR}/*.h" "${ENGINE_SRC_DIR}/*.cpp")
 
 set(ENGINE "2DGameEngine")
 
 add_library(${ENGINE} STATIC ${engine_src})
+set_target_properties(${ENGINE} PROPERTIES DEBUG_POSTFIX "_d")
+set_target_properties(${ENGINE} PROPERTIES DEBUGEDITOR_POSTFIX "_ed")
+
 target_compile_definitions(${ENGINE} PUBLIC $<$<CONFIG:DebugEditor>:EDITOR=1>)
-target_include_directories(${ENGINE} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Public")
-target_include_directories(${ENGINE} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(${ENGINE} 
+    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/Public"
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(UNIX)
     message(FATAL_ERROR "UNIX not implemented!")
@@ -36,5 +35,4 @@ else()
     target_link_libraries(${ENGINE} PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:DebugEditor>>:${imgui_lib}>)
 endif()
 
-include(${ADDITIONAL_INCLUDE_PATH}/Functions.cmake)
 GroupSourcesByFolder(${ENGINE})
